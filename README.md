@@ -40,8 +40,8 @@ addons/
 │                             Action/ActionRunner/Rules/Authority, WorldManager
 ├── mikeys_basic_ai/          SimpleAIController -- reference AI, swap it out
 ├── mikeys_basic_networking/  ENet transport only -- reference networking, swap it out
-└── mikeys_gm_module/         (empty) future GM tooling; Controller/Authority/Action
-                              already support it without any Bones changes
+└── mikeys_cameras/           third-person, first-person, isometric Camera3Ds --
+                              depends on nothing, not even Bones
 
 demo/                        the framework's own bundled reference demo
 ├── rules/                    a tiny lite-d20 engine (RulesProvider/RulesManager)
@@ -52,7 +52,10 @@ demo/                        the framework's own bundled reference demo
 
 docs/                        the design conversations behind this architecture --
                               read chronologically, they're the actual decision log
+├── ARCHITECTURE_BOUNDARIES.md   where code goes and why -- the one doc that is
+                                 a contract rather than a conversation
 tools/verify.sh              headless smoke test
+tools/check-addon-boundaries.py  enforces ARCHITECTURE_BOUNDARIES.md mechanically
 ```
 
 `addons/` is gitignored except our own `mikeys_*` addons — third-party addons are re-downloadable and not tracked; ours aren't third-party.
