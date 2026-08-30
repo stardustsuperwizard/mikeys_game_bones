@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://addons/mikeys_game_bones/actors/actor.gd" id="1"]
 [ext_resource type="Resource" path="res://demo/data/players/mike.tres" id="2"]
@@ -19,6 +19,19 @@ properties/0/path = NodePath("Body:position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
 
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+radius = 0.05
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+albedo_color = Color(0.05, 0.05, 0.05, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_nose"]
+size = Vector3(0.11, 0.09, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nose"]
+albedo_color = Color(0.85, 0.6, 0.35, 1)
+
 [node name="Player" type="Node"]
 script = ExtResource("1")
 character_sheet = ExtResource("2")
@@ -34,6 +47,21 @@ mesh = SubResource("CapsuleMesh_player")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
+
+[node name="LeftEye" type="MeshInstance3D" parent="Body"]
+position = Vector3(-0.13, 1.52, -0.42)
+mesh = SubResource("SphereMesh_eye")
+material_override = SubResource("StandardMaterial3D_eye")
+
+[node name="RightEye" type="MeshInstance3D" parent="Body"]
+position = Vector3(0.13, 1.52, -0.42)
+mesh = SubResource("SphereMesh_eye")
+material_override = SubResource("StandardMaterial3D_eye")
+
+[node name="Nose" type="MeshInstance3D" parent="Body"]
+position = Vector3(0, 1.43, -0.4)
+mesh = SubResource("PrismMesh_nose")
+material_override = SubResource("StandardMaterial3D_nose")
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("3")
