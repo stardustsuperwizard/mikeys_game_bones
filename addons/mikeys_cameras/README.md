@@ -1,4 +1,4 @@
-# Mikey's Game Bones — Cameras
+# Mikey's Cameras
 
 Version **0.1.0**
 
@@ -27,7 +27,7 @@ setting it to `&""` removes the assumption entirely.
 
 ## Install
 
-Copy `addons/mikeys_game_bones-cameras/` into your project's `addons/`. There
+Copy `addons/mikeys_cameras/` into your project's `addons/`. There
 is no `plugin.cfg` and nothing to enable in Project Settings — these are
 library scripts, not an `EditorPlugin`. Attach one to a `Camera3D` and set
 `target_path`.
