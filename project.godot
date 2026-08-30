@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="Mikey's Game Bones"
-run/main_scene="res://game1_demo/scenes/world/demo_room.tscn"
+run/main_scene="res://demo/scenes/world/demo_room.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
 
-Rules="*res://game1_demo/rules/rules_manager.gd"
-Boot="*res://game1_demo/runtime/boot.gd"
+Rules="*res://demo/rules/rules_manager.gd"
+Boot="*res://demo/runtime/boot.gd"
 
 [input]
 

@@ -51,11 +51,11 @@ rm -f .godot/global_script_class_cache.cfg
 run_check "Project rescan (script parse + global classes)" \
 	"$GODOT_BIN" --headless --editor --quit --path .
 
-run_check "Main scene boot (game1_demo/demo_room.tscn)" \
+run_check "Main scene boot (demo/demo_room.tscn)" \
 	"$GODOT_BIN" --headless --path . --quit-after 20
 
 run_check "demo_room_2d.tscn (2D presentation proof, booted directly)" \
-	"$GODOT_BIN" --headless --path . res://game1_demo/scenes/world/demo_room_2d.tscn --quit-after 10
+	"$GODOT_BIN" --headless --path . res://demo/scenes/world/demo_room_2d.tscn --quit-after 10
 
 echo
 if [ "$fail" -ne 0 ]; then

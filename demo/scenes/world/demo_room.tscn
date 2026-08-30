@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://1lgbwaee6dxl"]
 
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/actors/player.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/actors/nonplayer.tscn" id="2"]
-[ext_resource type="Resource" uid="uid://p2v41e1wlpxy" path="res://game1_demo/data/nonplayers/goblin.tres" id="3"]
+[ext_resource type="PackedScene" path="res://demo/scenes/actors/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://demo/scenes/actors/nonplayer.tscn" id="2"]
+[ext_resource type="Resource" uid="uid://p2v41e1wlpxy" path="res://demo/data/nonplayers/goblin.tres" id="3"]
 [ext_resource type="Script" uid="uid://cjdpbv8uumhmx" path="res://addons/mikeys_game_bones/world/world_manager.gd" id="4"]
 [ext_resource type="Script" uid="uid://snsjljqxfyjg" path="res://addons/mikeys_game_bones/world/spawn_point.gd" id="5"]
-[ext_resource type="Resource" uid="uid://btfpchqdd213b" path="res://game1_demo/data/players/mike.tres" id="6"]
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/world/door.tscn" id="9"]
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/ui/interaction_prompt.tscn" id="10"]
+[ext_resource type="Resource" uid="uid://btfpchqdd213b" path="res://demo/data/players/mike.tres" id="6"]
+[ext_resource type="PackedScene" path="res://demo/scenes/world/door.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://demo/scenes/ui/interaction_prompt.tscn" id="10"]
 
 [sub_resource type="Resource" id="SpawnPoint_mike"]
 script = ExtResource("5")

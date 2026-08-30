@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CharacterSheet" format=3 uid="uid://p2v41e1wlpxy"]
 
-[ext_resource type="Script" uid="uid://bluarniaxqex5" path="res://game1_demo/rules/lite/character_sheet.gd" id="1"]
-[ext_resource type="Script" uid="uid://dcb05fl6umab" path="res://game1_demo/rules/lite/ability_scores.gd" id="2"]
+[ext_resource type="Script" uid="uid://bluarniaxqex5" path="res://demo/rules/lite/character_sheet.gd" id="1"]
+[ext_resource type="Script" uid="uid://dcb05fl6umab" path="res://demo/rules/lite/ability_scores.gd" id="2"]
 
 [sub_resource type="Resource" id="AbilityScores_goblin"]
 script = ExtResource("2")

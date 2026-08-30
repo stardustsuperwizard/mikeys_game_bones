@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/actors/player_2d.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://game1_demo/scenes/actors/nonplayer_2d.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://demo/scenes/actors/player_2d.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://demo/scenes/actors/nonplayer_2d.tscn" id="2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ns"]
 size = Vector2(840, 20)

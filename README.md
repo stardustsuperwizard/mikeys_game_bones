@@ -1,6 +1,6 @@
 # Mikey's Game Bones
 
-A reusable RPG gameplay framework for Godot 4, plus a small bundled demo proving it works. Not a game — a starting point for one, in the same spirit as [Maaack's Godot Minimal Game Template](https://github.com/Maaack/Godot-Minimal-Game-Template): a repo you clone (or pull individual addons out of) to start building, not something you play.
+A reusable RPG gameplay framework for Godot 4, plus a small bundled demo proving it works. Not a game — a starting point for one. Works two ways at once, in the same spirit as [Maaack's Godot Game Template](https://github.com/Maaack/Godot-Game-Template): clone the whole repo as a template to start a new project, or copy just the addon folder into an existing project's `addons/` to use it as a plugin.
 
 ## What this repo actually is
 
@@ -8,7 +8,7 @@ Three things living together on purpose:
 
 - **`addons/mikeys_game_bones/`** — the framework itself. Genre-agnostic gameplay semantics: what a game object is, what an action is, how rules resolve it, who's allowed to ask.
 - **`addons/mikeys_basic_ai/`, `addons/mikeys_basic_networking/`** — reference/default implementations of the extension points the framework defines (a dumb chase-and-attack AI, a bare ENet transport). Meant to be swapped, not kept.
-- **`game1_demo/`** — the framework's own minimal bundled example: a tiny lite-d20 rules engine, a player, a goblin, a door, in both 3D and 2D. Proof the pieces fit together, not a real game.
+- **`demo/`** — the framework's own minimal bundled example: a tiny lite-d20 rules engine, a player, a goblin, a door, in both 3D and 2D. Proof the pieces fit together, not a real game.
 
 A real game built from this — with real content, real art, its own rules engine, its own release lifecycle — belongs in its *own* repo, consuming these addons rather than living inside them. `misadventures_rpg` is that repo.
 
@@ -26,7 +26,7 @@ A real game built from this — with real content, real art, its own rules engin
 The load-bearing rules this project has actually held to, not aspirations:
 
 - **Game objects represent what exists. Actions represent what is attempted. Rules determine what happens. Godot represents the result.** The full reasoning is in [`docs/20260815T130000Z - Game Objects and Rules.md`](docs/20260815T130000Z%20-%20Game%20Objects%20and%20Rules.md).
-- **Bones defines contracts, not features.** `Controller`, `Action`, `Rules`, `Authority` are minimal interfaces. Bones ships at most one clearly-labeled reference/default implementation per contract (`SimpleAIController`, the ENet transport, `LiteRulesProvider` in `game1_demo`) — never the "real," opinionated version of anything genre-specific. A serious AI, a better rules engine, a GM toolkit: all separate addons implementing the same contract.
+- **Bones defines contracts, not features.** `Controller`, `Action`, `Rules`, `Authority` are minimal interfaces. Bones ships at most one clearly-labeled reference/default implementation per contract (`SimpleAIController`, the ENet transport, `LiteRulesProvider` in `demo`) — never the "real," opinionated version of anything genre-specific. A serious AI, a better rules engine, a GM toolkit: all separate addons implementing the same contract.
 - **Presentation is separate from gameplay semantics.** `Actor` is a plain `Node`, not a `CharacterBody3D` — it owns a swappable presentation body (`ActorBody3D`/`ActorBody2D`). Nothing above that line cares which one it has.
 - **Don't build an abstraction until a second real case needs it.** Every interface in this framework exists because something concrete demanded it, not because it might someday. When in doubt, keep the concrete case simple and obvious rather than generalize early.
 - **New content should be data. New behavior should require code.** If adding a goblin variant means writing a script, something's wrong.
@@ -43,7 +43,7 @@ addons/
 └── mikeys_gm_module/         (empty) future GM tooling; Controller/Authority/Action
                               already support it without any Bones changes
 
-game1_demo/                  the framework's own bundled reference demo
+demo/                        the framework's own bundled reference demo
 ├── rules/                    a tiny lite-d20 engine (RulesProvider/RulesManager)
 ├── data/                     example content: a player, a goblin, a door
 ├── scenes/                   the demo room, 3D and 2D presentations
@@ -57,14 +57,20 @@ tools/verify.sh              headless smoke test
 
 `addons/` is gitignored except our own `mikeys_*` addons — third-party addons are re-downloadable and not tracked; ours aren't third-party.
 
-## Setup
+## Usage
 
-Requires Godot 4.7+. Clone and open in Godot — `project.godot` boots straight into `game1_demo`'s demo room. No main menu; nothing installs one here.
+Two ways to start from this:
+
+### As a template
+
+Requires Godot 4.7+. Clone the whole repo and open it in Godot — `project.godot` boots straight into `demo`'s demo room. No main menu; nothing installs one here. Replace `demo/` with your own content once you've got real scenes standing up (or delete it), and keep `addons/`.
+
+### As a plugin
+
+Copy `addons/mikeys_game_bones/` — and whichever of `mikeys_basic_ai/` or `mikeys_basic_networking/` you actually want — into an existing project's `addons/` folder. Nothing in it assumes it owns your project's main scene, autoloads, or boot sequence.
+
+Unlike Maaack's template, there's no `EditorPlugin`/`plugin.cfg` here and nothing to enable under **Project Settings > Plugins** — Bones defines contracts, not features (see Axioms above), so it ships as plain scripts rather than an editor plugin. "Plugin" means drop-in addon, not an Asset Library install with a setup wizard.
 
 ## Verification
 
-`tools/verify.sh` smoke-tests the project: rescans all scripts for parse errors, then boots the project and `game1_demo/scenes/world/demo_room_2d.tscn` headless and checks for runtime errors. Not a behavior test — it doesn't assert in-game outcomes, just that everything loads and runs. Run it after moving or renaming files, or before committing.
-
-## Starting a real game from this
-
-Clone the repo, keep `addons/`, replace `game1_demo/` with your own content (or delete it once you've got your own scenes standing up). If you only want the framework, copying `addons/mikeys_game_bones/` — and whichever of the reference addons you actually want — into an existing project's `addons/` works too; nothing in it assumes it owns your project's main scene, autoloads, or boot sequence.
+`tools/verify.sh` smoke-tests the project: rescans all scripts for parse errors, then boots the project and `demo/scenes/world/demo_room_2d.tscn` headless and checks for runtime errors. Not a behavior test — it doesn't assert in-game outcomes, just that everything loads and runs. Run it after moving or renaming files, or before committing.
