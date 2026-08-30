@@ -5,6 +5,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Addon boundaries first: it needs no Godot, so it still runs (and still
+# fails) in an environment where the checks below cannot. find_godot exits
+# outright when Godot is missing, so anything after it is Godot-gated.
+echo "=== Addon boundaries ==="
+"$(dirname "$0")/check-addon-boundaries.py"
+echo
+
 find_godot() {
 	for candidate in godot4 godot; do
 		if command -v "$candidate" >/dev/null 2>&1; then

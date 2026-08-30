@@ -102,6 +102,10 @@ project:
 - **Never edit a consumer's copy.** This folder is the canonical source.
   Improvements land here and flow outward.
 
+The first three are checked mechanically by
+`tools/check-addon-boundaries.py` (also the first step of `tools/verify.sh`).
+The reasoning behind them is in `docs/ARCHITECTURE_BOUNDARIES.md`.
+
 ## Consumers, and the drift this addon exists to end
 
 These scripts previously existed as two hand-maintained copies with no shared
