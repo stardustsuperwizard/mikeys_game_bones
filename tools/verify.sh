@@ -39,14 +39,34 @@ run_check() {
 	local label="$1"
 	shift
 	echo "=== $label ==="
-	local output
-	output=$("$@" 2>&1) || true
+
+	# Capture the status rather than discarding it with `|| true`. Godot
+	# often exits 0 on a script error, which is why the log is grepped at
+	# all -- but the reverse also happens, and a non-zero exit with no line
+	# matching "error" was reported as a pass. Both signals now count, and
+	# either one alone fails the check.
+	local output status=0
+	output=$("$@" 2>&1) || status=$?
+
 	local errors
 	errors=$(printf '%s\n' "$output" | grep -iE "error" | grep -vE "$BENIGN_PATTERN" || true)
+
 	if [ -n "$errors" ]; then
 		printf '%s\n' "$errors"
 		fail=1
-	else
+	fi
+
+	if [ "$status" -ne 0 ]; then
+		echo "exited $status"
+		# Without a matching error line there is nothing above to say what
+		# happened, so the log is the only evidence there is.
+		if [ -z "$errors" ]; then
+			printf '%s\n' "$output"
+		fi
+		fail=1
+	fi
+
+	if [ -z "$errors" ] && [ "$status" -eq 0 ]; then
 		echo "ok"
 	fi
 }
