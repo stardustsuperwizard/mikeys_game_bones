@@ -1,7 +1,43 @@
 # Mikey's Game Bones
 
+Version **0.2.0**
+
 A reusable, genre-agnostic gameplay framework for Godot 4 — the semantic layer between Godot's engine primitives (nodes, physics, rendering) and a specific game's rules and presentation.
- 
+
+## Changes
+
+### 0.2.0 — the facing contract
+
+`Controller` gains two methods, both with defaults, so existing subclasses keep
+working without edits:
+
+- `get_turn_input() -> float` — explicit turn intent, `0.0` by default.
+- `should_auto_face_movement() -> bool` — whether the body may rotate to face
+  its own travel direction when nothing else claims facing. `true` by default,
+  which is what an AI wants: it has no other way to turn. A controller with
+  real turn controls overrides it `false`, so strafing without a turn key held
+  doesn't spin the actor toward its travel.
+
+`ActorBody3D` and `ActorBody2D` act on it with one shared priority: an
+attack or interact target this frame wins, then explicit turn input, then
+auto-facing the move direction. Combat and interaction read wrong from any
+angle but forward, so snapping to face a target beats waiting for the player
+to have aimed there manually.
+
+Turn input is applied *before* `get_move_direction()` is read, so a turn key
+and a move key held in the same frame produce movement along the new heading
+rather than lagging a frame behind it.
+
+This arrived as a fork. `mikeys_game_world` needed all of it and edited these
+three files in place, which is what `docs/ARCHITECTURE_BOUNDARIES.md` was
+written about. The behavior was right and the location was wrong; this
+promotes it to where it belonged, which is the sanctioned way to make a Tier 1
+change.
+
+### 0.1.0
+
+Everything before the above, retroactively. The framework was previously
+unversioned.
 
 ## What's in it
 
