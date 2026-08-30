@@ -1,7 +1,7 @@
 # Head-mounted first-person camera. Attach to a Camera3D node and point
 # target_path at the actor whose head it should ride.
 #
-# Unlike ThirdPersonCamera3D, this camera captures the mouse unconditionally
+# Unlike MikeyThirdPersonCamera3D, this camera captures the mouse unconditionally
 # while active (standard FPS convention -- there's no free-look toggle,
 # since the camera *is* the look direction) and has no zoom or wall-collision
 # handling, since it never leaves the target's head to begin with.
@@ -12,11 +12,17 @@
 # than this script reaching into the target to steer it -- the same
 # presentation/logic separation ActorBody3D and Controller already keep for
 # movement.
-class_name FirstPersonCamera3D
+class_name MikeyFirstPersonCamera3D
 extends Camera3D
 
 ## Node path to the target this camera rides.
 @export var target_path: NodePath = NodePath("")
+
+## Input action that snaps the view back to its default framing. The action
+## is looked up by name at runtime and is entirely optional -- if the project
+## has no such action the camera just never recenters, and nothing errors.
+## Set to &"" to disable recentering outright. See this addon's README.
+@export var recenter_action: StringName = &"camera_recenter"
 
 ## Vertical offset added to the target's position; eye height.
 @export var eye_height_offset: float = 1.6
@@ -51,7 +57,7 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("camera_recenter"):
+	if _is_recenter_pressed(event):
 		_pitch_degrees = 0.0
 		return
 	if event is InputEventMouseMotion:
@@ -79,3 +85,19 @@ func _update_transform() -> void:
 		return
 	global_position = _target.global_position + Vector3(0, eye_height_offset, 0)
 	global_rotation = Vector3(deg_to_rad(_pitch_degrees), deg_to_rad(_yaw_degrees), 0)
+
+
+# True only when `recenter_action` is both configured and actually present in
+# the project's InputMap.
+#
+# The guard is not defensive padding: `InputEvent.is_action_pressed()` on an
+# action the project never defined raises "Request for nonexistent InputMap
+# action" on *every* input event, so a consumer who installs this addon and
+# hasn't added the binding yet gets an error storm rather than a camera that
+# simply doesn't recenter. A library cannot assume its host's InputMap.
+func _is_recenter_pressed(event: InputEvent) -> bool:
+	if recenter_action == &"":
+		return false
+	if not InputMap.has_action(recenter_action):
+		return false
+	return event.is_action_pressed(recenter_action)

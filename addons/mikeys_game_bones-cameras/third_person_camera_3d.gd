@@ -1,17 +1,19 @@
 # WoW-style third-person "chase" camera. Attach to a Camera3D node and
 # configure the target via exports.
 #
-# Vendored from mikeys_game_bones-rules-moba/scripts/third_person_camera_3d.gd
-# -- it has no MOBA-specific dependencies (no rules/, no MobaCombatant), so
-# it's copied here as-is rather than reimplemented. Re-sync manually if the
-# source gets improved; there's no shared package between the two repos.
+# This addon is the canonical home for this camera. It began life as
+# mikeys_game_bones-rules-moba/scripts/third_person_camera_3d.gd and was
+# copied into mikeys_game_world before either repo had a shared package to
+# put it in; both of those copies had already drifted apart by the time this
+# addon was created. Improvements land here and flow outward -- do not edit a
+# consumer's copy.
 #
 # Current behavior: the camera holds whatever yaw you last mouse-looked
 # to. Holding the right mouse button free-looks around the target; the
 # camera keeps that angle on release rather than swinging back behind the
 # target. The scroll wheel zooms, and a raycast keeps the camera from
-# clipping through walls. Pressing C (camera_recenter) snaps the view back
-# to the default over-the-shoulder framing -- behind the target, default
+# clipping through walls. The recenter_action input action snaps the view
+# back to the default over-the-shoulder framing -- behind the target, default
 # pitch and zoom.
 #
 # Setting auto_realign restores the WoW-style chase camera: the view tracks
@@ -25,11 +27,17 @@
 # else writes mouse_mode today; a future system that needs a captured cursor of
 # its own has to coordinate with this reconciliation rather than set the mode
 # behind it.
-class_name ThirdPersonCamera3D
+class_name MikeyThirdPersonCamera3D
 extends Camera3D
 
 ## Node path to the target this camera tracks.
 @export var target_path: NodePath = NodePath("")
+
+## Input action that snaps the view back to its default framing. The action
+## is looked up by name at runtime and is entirely optional -- if the project
+## has no such action the camera just never recenters, and nothing errors.
+## Set to &"" to disable recentering outright. See this addon's README.
+@export var recenter_action: StringName = &"camera_recenter"
 
 ## Vertical offset added to the target's position; roughly chest/head height.
 @export var target_height_offset: float = 1.4
@@ -46,7 +54,7 @@ extends Camera3D
 ## once the right mouse button is released. Only used when auto_realign.
 @export var realign_speed_degrees: float = 180.0
 
-## Pitch the camera starts at and returns to when recentered with C.
+## Pitch the camera starts at and returns to when recentered.
 @export var default_pitch_degrees: float = 20.0
 
 ## Pitch clamp, in degrees. Positive pitch elevates the camera above the
@@ -55,7 +63,7 @@ extends Camera3D
 @export var min_pitch_degrees: float = -10.0
 @export var max_pitch_degrees: float = 80.0
 
-## Zoom distance the camera starts at and returns to when recentered with C.
+## Zoom distance the camera starts at and returns to when recentered.
 @export var default_distance: float = 8.0
 
 ## Zoom distance clamp and scroll-wheel step, in meters.
@@ -71,11 +79,16 @@ extends Camera3D
 @export var collision_margin: float = 0.3
 
 ## Group searched for a target if target_path doesn't resolve at _ready()
-## (or is left empty). mikeys_game_world spawns its Player dynamically via
-## WorldManager, which runs in DemoRoom's own _ready() -- and Godot readies
-## children (this camera, a DemoRoom sibling) before parents, so the Player
-## doesn't exist yet when this camera's _ready() runs. Ignored once a
-## target is found; set to &"" to disable and rely on target_path only.
+## (or is left empty), for players spawned at runtime rather than authored
+## into the scene: Godot readies children before parents, so a camera whose
+## _ready() runs before the spawner's has no target to bind yet. The group
+## member may be the player root; its "Body" child is preferred when present
+## (see _try_find_fallback_target). Ignored once a target is found; set to
+## &"" to disable and rely on target_path only.
+##
+## This default is the one place this addon assumes anything about its host
+## -- &"players" is the group mikeys_game_bones' PlayerController adds. It is
+## a default, not a dependency: nothing here imports Bones.
 @export var fallback_target_group: StringName = &"players"
 
 var _target: Node3D = null
@@ -93,7 +106,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("camera_recenter"):
+	if _is_recenter_pressed(event):
 		recenter()
 		return
 	if event is InputEventMouseButton:
@@ -155,11 +168,10 @@ func _process(delta: float) -> void:
 	_update_transform(delta)
 
 
-# See fallback_target_group -- a Player that doesn't exist yet at _ready()
-# shows up in the "players" group (added by PlayerController._ready(), on
-# the Actor node itself) within a frame or two of spawning. The group
-# member is the Actor (a plain Node, not Node3D); this camera actually
-# tracks its "Body" child, same as InteractionPrompt/WorldManager already do.
+# See fallback_target_group -- a player that doesn't exist yet at _ready()
+# joins the group within a frame or two of spawning. The group member is
+# often a logical node rather than a Node3D (Bones' Actor is a plain Node),
+# so the "Body" child is what actually gets tracked when there is one.
 func _try_find_fallback_target() -> void:
 	if fallback_target_group == &"":
 		return
@@ -214,3 +226,19 @@ func _resolve_collision_distance(
 	if result:
 		return maxf(pivot.distance_to(result.position) - collision_margin, 0.1)
 	return desired_distance
+
+
+# True only when `recenter_action` is both configured and actually present in
+# the project's InputMap.
+#
+# The guard is not defensive padding: `InputEvent.is_action_pressed()` on an
+# action the project never defined raises "Request for nonexistent InputMap
+# action" on *every* input event, so a consumer who installs this addon and
+# hasn't added the binding yet gets an error storm rather than a camera that
+# simply doesn't recenter. A library cannot assume its host's InputMap.
+func _is_recenter_pressed(event: InputEvent) -> bool:
+	if recenter_action == &"":
+		return false
+	if not InputMap.has_action(recenter_action):
+		return false
+	return event.is_action_pressed(recenter_action)

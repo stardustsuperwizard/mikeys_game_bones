@@ -4,15 +4,15 @@
 # No mouse-look -- pitch and yaw are fixed exports, tuned once in the
 # inspector for the game's grid/art style. Only zoom (scroll wheel) moves
 # at runtime, using the same spring-toward-target-distance approach as
-# ThirdPersonCamera3D so a zoom step glides in rather than snapping.
+# MikeyThirdPersonCamera3D so a zoom step glides in rather than snapping.
 #
-# Deliberately no view-rotation input: rotating an isometric camera around
-# the target needs a dedicated action (e.g. camera_rotate_left/right) that
-# doesn't exist in this project's input map yet, and guessing a binding
-# risks colliding with something else already there (see the strafe_right/
-# interact collision earlier in this project's history). Add rotate_step_
-# degrees-style input here once that action exists.
-class_name IsometricCamera3D
+# Deliberately no view-rotation input. Rotating an isometric camera around
+# the target needs a dedicated action, and a library that invents an action
+# name has no way to know it isn't already bound to something else in the
+# host project. If this grows rotation, it takes an exported action name
+# defaulting to unset -- the same shape as recenter_action on
+# MikeyThirdPersonCamera3D.
+class_name MikeyIsometricCamera3D
 extends Camera3D
 
 ## Node path to the target this camera tracks.
@@ -67,7 +67,7 @@ func _update_transform(delta: float) -> void:
 	var yaw_rad := deg_to_rad(yaw_degrees)
 	var pitch_rad := deg_to_rad(pitch_degrees)
 
-	# Same pivot-relative direction math as ThirdPersonCamera3D, just with
+	# Same pivot-relative direction math as MikeyThirdPersonCamera3D, just with
 	# fixed yaw/pitch instead of mouse-driven values.
 	var direction := Vector3(
 		sin(yaw_rad) * cos(pitch_rad), sin(pitch_rad), cos(yaw_rad) * cos(pitch_rad)
