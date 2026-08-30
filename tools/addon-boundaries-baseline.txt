@@ -1,0 +1,37 @@
+# Known addon-boundary violations, accepted for now.
+#
+# This is a BASELINE, not a suppression list. Every line below is a real
+# defect: addons/mikeys_game_bones/ references a global name that the
+# consuming game supplies, so the framework does not parse in a project that
+# does not happen to define it. The README's "copy addons/mikeys_game_bones/
+# into an existing project" instruction is false while these exist.
+#
+# They are listed here so the check can be green on a repository that already
+# carries this debt, while still failing on any NEW violation. Shrinking this
+# file to empty is the definition of done.
+#
+# Format: one `path:Symbol` per line. Line numbers are deliberately not part
+# of the key -- an edit above a violation should not turn an unrelated change
+# red. A line here that no longer matches anything fails the check, so paying
+# a debt down forces removing its entry rather than leaving it to re-permit
+# the violation later.
+#
+# --- Bones requires a `Rules` global with attack/open/pickup --------------
+#
+# Satisfied two different ways today, by accident rather than contract:
+# this repo registers an autoload named Rules; mikeys_game_bones-rules-moba
+# declares `class_name Rules extends Object` with static methods. Both make
+# `Rules.attack(...)` resolve. Neither is written down anywhere.
+addons/mikeys_game_bones/actions/verbs/attack_action.gd:Rules
+addons/mikeys_game_bones/actions/verbs/open_action.gd:Rules
+addons/mikeys_game_bones/actions/verbs/pickup_action.gd:Rules
+#
+# --- Bones requires a global `CharacterSheet` -----------------------------
+#
+# Declared in demo/rules/lite/character_sheet.gd here, and again in
+# mikeys_game_bones-rules-moba/scripts/character_sheet.gd. Two independent
+# games both had to supply it; that is an interface, and it belongs in the
+# framework or in a ruleset addon rather than in demo content.
+addons/mikeys_game_bones/actors/actor.gd:CharacterSheet
+addons/mikeys_game_bones/world/spawn_point.gd:CharacterSheet
+addons/mikeys_game_bones/world/world_manager.gd:CharacterSheet

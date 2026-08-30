@@ -1,0 +1,114 @@
+name: CI
+
+# Three jobs, split by what they need rather than what they check.
+#
+# `boundaries` and `lint` need no Godot, so they finish in seconds and give a
+# useful answer even when the engine download is cold or the runner is slow.
+# `godot` is the expensive one. Keeping them separate means a boundary
+# violation reports as a boundary violation rather than as one red blob.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # A second push to the same branch makes the first run's answer obsolete.
+  # Never cancel on main: those runs are the record of what the branch did.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  boundaries:
+    name: Addon Boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Stdlib only -- no install step, and nothing to pin.
+      - run: tools/check-addon-boundaries.py
+
+  lint:
+    name: GDScript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Diff-scoping needs the base commit, which a shallow clone lacks.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install gdtoolkit
+        run: pip install "gdtoolkit==4.*"
+
+      # Diff-scoped, not whole-repo. This check is being introduced onto a
+      # codebase that already has lint drift (7 failures at the time of
+      # writing, all in files this change does not touch). Gating on the
+      # files a change actually touches holds new and edited code to the
+      # standard immediately, without blocking unrelated work on legacy debt
+      # or tempting anyone to relax a rule to get green.
+      #
+      # Same reasoning as mikeys_game_bones-rules-moba's lint-gdscript
+      # action, which this is a much smaller version of.
+      - name: Collect changed GDScript files
+        id: changed
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch --quiet origin "${{ github.base_ref }}"
+            range="$base...HEAD"
+          else
+            # A push build has no base branch to diff against. Comparing
+            # against the previous commit keeps the same "only what changed"
+            # contract rather than silently widening to the whole repo.
+            range="HEAD~1...HEAD"
+          fi
+
+          # ACMR: added, copied, modified, renamed. Deleted files have
+          # nothing left to lint and would fail the tool on a missing path.
+          git diff --name-only --diff-filter=ACMR "$range" -- '*.gd' \
+            > changed.txt || true
+
+          # A renamed or deleted file can still appear if it was removed in a
+          # later commit of the same range, so filter to what exists now.
+          : > changed-existing.txt
+          while IFS= read -r f; do
+            [ -f "$f" ] && echo "$f" >> changed-existing.txt
+          done < changed.txt
+          mv changed-existing.txt changed.txt
+
+          count=$(wc -l < changed.txt)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "$count changed GDScript file(s):"
+          cat changed.txt
+
+      - name: gdformat --check
+        if: steps.changed.outputs.count != '0'
+        run: xargs -a changed.txt gdformat --check
+
+      - name: gdlint
+        if: steps.changed.outputs.count != '0'
+        run: xargs -a changed.txt gdlint
+
+  godot:
+    name: Godot Headless Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-godot
+
+      # tools/verify.sh is the single source of truth for pass/fail, exactly
+      # as it is locally. CI does not get its own copy of the checks -- that
+      # is how the two drift apart and how a green CI stops meaning anything.
+      - run: tools/verify.sh
