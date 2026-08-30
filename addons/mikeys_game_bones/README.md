@@ -7,7 +7,7 @@ A reusable, genre-agnostic gameplay framework for Godot 4 — the semantic layer
 
 ```
 actions/         Action, ActionResult, ActionRunner (the request -> legality -> resolve pipeline)
-  verbs/          concrete actions: AttackAction, OpenAction
+  verbs/          concrete actions: AttackAction, OpenAction, PickupAction
 actors/          Actor (a presentation-neutral Node)
   bodies/          presentation shells: ActorBody3D, ActorBody2D
 authority/       Authority (can this requester act as this actor?)
@@ -15,7 +15,7 @@ controllers/     Controller, PlayerController (decision-making, not execution --
                    AI decision-making is deliberately not here, see
                    addons/mikeys_basic_ai/)
 things/          GameObject, ObjectDefinition (traits/capabilities/state -- the "noun" layer)
-  props/           concrete non-actor things: Door
+  props/           concrete non-actor things: Door, ItemPickup3D
 world/           WorldManager, SpawnPoint
 ```
 
